@@ -1,0 +1,29 @@
+﻿@page "/"
+@using System.Net.Http.Json
+@inject HttpClient httpClient
+
+<MudDataGrid Items="Pizzas" Filterable="true" SortMode="@SortMode.Multiple">
+<Columns>
+        <PropertyColumn Property="x => x.Cliente" Title="Pedido" />
+        <PropertyColumn Property="x => x.Sabor" Title="Sabor" />
+        <PropertyColumn Property="x => x.Valor" Title="A ser Pago" />
+        <PropertyColumn Property="x => x.TaxaDeEntrega" Title="Taxa de Entrega" />
+</Columns>
+</MudDataGrid>
+
+@code{
+    public record Pizza(string Cliente ,string Sabor, decimal Valor, decimal TaxaDeEntrega);
+    public IEnumerable<Pizza> Pizzas;
+    protected override Task OnInitializedAsync()
+    {
+        Pizzas = new List<Pizza> 
+        {
+            new Pizza("Antônio", "Frango com Catupiry", 25.5m, 3.7m),
+            new Pizza("Priscila", "Á Moda", 40.7m, 1m),
+            new Pizza("Marcos", "Milho e Bacon", 20m, 8m),
+            new Pizza("Angélica", "Portuguesa", 30m, 2.7m),
+            new Pizza("Mônica", "Lombo Canadense", 55.99m, 15m)
+        };
+        return base.OnInitializedAsync();
+    }
+}
