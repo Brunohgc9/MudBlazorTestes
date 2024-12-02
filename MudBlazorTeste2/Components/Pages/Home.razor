@@ -2,8 +2,9 @@
 @using System.Net.Http.Json
 @inject HttpClient httpClient
 
-<MudDataGrid Items="Pizzas" Filterable="true" SortMode="@SortMode.Multiple">
+<MudDataGrid Items="Pizzas" Filterable="true" SortMode="@SortMode.Multiple" Hover="true" ApplyDropClassesOnDragStarted="true" DragDropColumnReordering="true">
 <Columns>
+        <SelectColumn DragAndDropEnabled="true" Hideable="true" T="Pizza"/>
         <PropertyColumn Property="x => x.Cliente" Title="Pedido" />
         <PropertyColumn Property="x => x.Sabor" Title="Sabor" />
         <PropertyColumn Property="x => x.Valor" Title="A ser Pago" />
