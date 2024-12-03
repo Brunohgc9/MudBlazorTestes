@@ -2,19 +2,57 @@
 @using System.Net.Http.Json
 @inject HttpClient httpClient
 
-<MudDataGrid Items="Pizzas" Filterable="true" SortMode="@SortMode.Multiple" Hover="true" ApplyDropClassesOnDragStarted="true" DragDropColumnReordering="true">
-<Columns>
-        <SelectColumn DragAndDropEnabled="true" Hideable="true" T="Pizza"/>
-        <PropertyColumn Property="x => x.Cliente" Title="Pedido" />
-        <PropertyColumn Property="x => x.Sabor" Title="Sabor" />
-        <PropertyColumn Property="x => x.Valor" Title="A ser Pago" />
-        <PropertyColumn Property="x => x.TaxaDeEntrega" Title="Taxa de Entrega" />
-</Columns>
-</MudDataGrid>
+<MudDrawer @bind-Open="@_open" Width="@_width" Height="@_height" Anchor="@_anchor" Elevation="1" Variant="@DrawerVariant.Temporary">
+    <MudDrawerHeader>
+        <MudText Typo="Typo.h6">My App</MudText>
+    </MudDrawerHeader>
+    <MudNavMenu>
+        <MudNavLink Match="NavLinkMatch.All">Store</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All">Library</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All">Community</MudNavLink>
+    </MudNavMenu>
+</MudDrawer>
 
-@code{
+<MudContainer Fixed="true" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <MudDataGrid Items="Pizzas" Filterable="true" SortMode="@SortMode.Multiple" Hover="true" ApplyDropClassesOnDragStarted="true" DragDropColumnReordering="true">
+        <ToolBarContent> @* Local onde Colocamos titulos, searchbar, buttons, etc. *@
+            <MudText Typo="Typo.h3">Pizzas</MudText>
+            <MudSpacer/>
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Success">Adicionar</MudButton>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ControlPointDuplicate" Color="Color.Tertiary">Duplicar</MudButton>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" Color="Color.Info">Procurar</MudButton>
+            </MudButtonGroup>
+        </ToolBarContent>
+        <Columns>
+            <SelectColumn DragAndDropEnabled="true" Hideable="true" T="Pizza" />
+            <PropertyColumn Property="x => x.Cliente" Title="Pedido"/>
+            <PropertyColumn Property="x => x.Sabor" Title="Sabor" />
+            <PropertyColumn Property="x => x.Valor" Title="A ser Pago" />
+            <PropertyColumn Property="x => x.TaxaDeEntrega" Title="Taxa de Entrega" />
+            <TemplateColumn>
+                <CellTemplate>
+                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                        <MudButton ClickPropagation="false">Ações</MudButton>
+                        <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" Style="align-self: auto;">
+                            <MudMenuItem OnClick="@(() => OpenDrawer(Anchor.End))">Reply</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => OpenDrawer(Anchor.End))">Reply All</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => OpenDrawer(Anchor.End))">Forward</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => OpenDrawer(Anchor.End))">Reply & Delete</MudMenuItem>
+                        </MudMenu>
+                    </MudButtonGroup>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+</MudContainer>
+
+
+
+@code{  
     public record Pizza(string Cliente ,string Sabor, decimal Valor, decimal TaxaDeEntrega);
-    public IEnumerable<Pizza> Pizzas;
+    public List<Pizza> Pizzas = new();
     protected override Task OnInitializedAsync()
     {
         Pizzas = new List<Pizza> 
@@ -26,5 +64,34 @@
             new Pizza("Mônica", "Lombo Canadense", 55.99m, 15m)
         };
         return base.OnInitializedAsync();
+    }
+    private bool _open;
+    private Anchor _anchor;
+    private string _width, _height;
+
+    private void OpenDrawer(Anchor anchor)
+    {
+        _open = true;
+        _anchor = anchor;
+
+        switch (anchor)
+        {
+            case Anchor.Start:
+                _width = "300px";
+                _height = "100%";
+                break;
+            case Anchor.End:
+                _width = "400px";
+                _height = "100%";
+                break;
+            case Anchor.Bottom:
+                _width = "100%";
+                _height = "200px";
+                break;
+            case Anchor.Top:
+                _width = "100%";
+                _height = "350px";
+                break;
+        }
     }
 }
