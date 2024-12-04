@@ -1,19 +1,53 @@
 ﻿@page "/counter"
 @rendermode InteractiveServer
+@using System.Threading
+@using MudBlazor
 
-<PageTitle>Counter</PageTitle>
 
-<h1>Counter</h1>
+<MudGrid>
+    <MudItem>
+        <MudAutocomplete T="string" Label="Pizzas" @bind-Value="userText" SearchFunc="SearchInBox" @onclick="() => ListItems()" />
+    </MudItem>
+</MudGrid>
 
-<p role="status">Current count: @currentCount</p>
+@code
+{
+    public record Pizza(string Cliente, string Sabor, decimal Valor, decimal TaxaDeEntrega);
+    public List<Pizza> Pizzas = new();
+    public string userText;
+    public List<string> PizzaNames = new();
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
-@code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
+    protected override Task OnInitializedAsync()
     {
-        currentCount++;
+        Pizzas = new List<Pizza>
+        {
+            new Pizza("Antônio", "Frango com Catupiry", 25.5m, 3.7m),
+            new Pizza("Priscila", "Á Moda", 40.7m, 1m),
+            new Pizza("Marcos", "Milho e Bacon", 20m, 8m),
+            new Pizza("Angélica", "Portuguesa", 30m, 2.7m),
+            new Pizza("Mônica", "Lombo Canadense", 55.99m, 15m)
+        };
+        return base.OnInitializedAsync();
+    }
+
+    private async Task<IEnumerable<string>> SearchInBox(string value, CancellationToken token)
+    {
+        if (string.IsNullOrEmpty(value))
+            return Pizzas.Select(x => x.Sabor); 
+
+        var names = Pizzas
+            .Where(x => x.Sabor.Contains(value, StringComparison.InvariantCultureIgnoreCase) ||
+                        x.Sabor.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+            .Select(x => x.Sabor);
+
+        PizzaNames = names.ToList();
+        Console.WriteLine(PizzaNames); //passar isso daqui para badges
+
+        return names;
+    }
+
+    private List<string> ListItems()
+    {
+        return PizzaNames.ToList();
     }
 }
