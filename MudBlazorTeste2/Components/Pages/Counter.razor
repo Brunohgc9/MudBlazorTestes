@@ -3,10 +3,22 @@
 @using System.Threading
 @using MudBlazor
 
-
 <MudGrid>
     <MudItem>
-        <MudAutocomplete T="string" Label="Pizzas" @bind-Value="userText" SearchFunc="SearchInBox" @onclick="() => ListItems()" />
+        <MudAutocomplete T="string"
+                         Label="Pizzas"
+                         Value="userText"
+                         ValueChanged="OnPizzaSelected"
+                         SearchFunc="SearchInBox"
+                         Immediate="true"
+                         Clearable="true" />
+
+        <MudChipSet T="string" AllClosable OnClose="OnChipClosed">
+            @foreach (var value in PizzaNames)
+            {
+                <MudChip Text="@value"></MudChip>
+            }
+        </MudChipSet>
     </MudItem>
 </MudGrid>
 
@@ -14,7 +26,7 @@
 {
     public record Pizza(string Cliente, string Sabor, decimal Valor, decimal TaxaDeEntrega);
     public List<Pizza> Pizzas = new();
-    public string userText;
+    public string userText = string.Empty;
     public List<string> PizzaNames = new();
 
     protected override Task OnInitializedAsync()
@@ -32,22 +44,30 @@
 
     private async Task<IEnumerable<string>> SearchInBox(string value, CancellationToken token)
     {
-        if (string.IsNullOrEmpty(value))
-            return Pizzas.Select(x => x.Sabor); 
+        var availablePizzas = Pizzas
+            .Select(x => x.Sabor)
+            .Except(PizzaNames)
+            .ToList();
 
-        var names = Pizzas
-            .Where(x => x.Sabor.Contains(value, StringComparison.InvariantCultureIgnoreCase) ||
-                        x.Sabor.Contains(value, StringComparison.InvariantCultureIgnoreCase))
-            .Select(x => x.Sabor);
+        if (string.IsNullOrWhiteSpace(value))
+            return availablePizzas;
 
-        PizzaNames = names.ToList();
-        Console.WriteLine(PizzaNames); //passar isso daqui para badges
-
-        return names;
+        return availablePizzas
+            .Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private List<string> ListItems()
+    private void OnPizzaSelected(string selectedValue)
     {
-        return PizzaNames.ToList();
+        if (!string.IsNullOrEmpty(selectedValue) && !PizzaNames.Contains(selectedValue))
+        {
+            PizzaNames.Add(selectedValue);
+            StateHasChanged();
+        }
+    }
+
+    private void OnChipClosed(MudChip<string> chip)
+    {
+        PizzaNames.Remove(chip.Text);
+        StateHasChanged();
     }
 }
